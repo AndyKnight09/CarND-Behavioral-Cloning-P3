@@ -12,27 +12,39 @@ from keras.layers.convolutional import Convolution2D
 from keras.layers.pooling import MaxPooling2D
 from keras.optimizers import Adam
 
+# Directory containing recorded simulation data
 log_directory = 'data/'
 
-# Hyperparameters
-EPOCHS = 6
-LEARNING_RATE = 0.001
-BATCH_SIZE = 32
+# Hyperparameters used to tune the model
+EPOCHS = 8                          # Number of training epochs
+LEARNING_RATE = 0.0015              # Learning rate 
+BATCH_SIZE = 32                     # Batch size (before taking into account left/centre/right cameras plus horizontally mirrored images)
 
-SIDE_CAMERA_STEERING_OFFSET = 0.3;
-DROPOUT_RATE = 0.2
+SIDE_CAMERA_STEERING_OFFSET = 0.3;  # Steering correction to apply to left/right camera images
+DROPOUT_RATE = 0.2                  # Fraction of input units to dropout for each dropout layer
 
+# Form a list of steering corrections for center, left and right camera images
 steering_correction = [0, +SIDE_CAMERA_STEERING_OFFSET, -SIDE_CAMERA_STEERING_OFFSET]
 
+# Shape of the input images (once converted to grayscale)
 image_shape = (160,320,1)
 
 def preprocess(image):
+    '''
+    returns a grayscale version of the input image
+    '''
     return np.expand_dims(cv2.cvtColor(image, cv2.COLOR_RGB2GRAY), axis=3)
 
 def flip_horizontal(image):
+    '''
+    returns a horizontally mirrored version of the image
+    '''
     return np.expand_dims(cv2.flip(image,1), axis=3)
     
 def generator(samples, batch_size=32):
+    '''
+    returns batches of images as required to reduce memory overhead
+    '''
     num_samples = len(samples)
     while 1: # Loop forever so the generator never terminates
         shuffle(samples)
@@ -49,21 +61,20 @@ def generator(samples, batch_size=32):
                     filename = source_path.split('\\')[-1]
                     image_path = log_directory + 'IMG/' + filename
                     image = cv2.imread(image_path)
-                    
-                    # Apply prepocessing
-                    image = preprocess(image)
-                    
-                    images.append(image)
 
                     # Parse steer angle
                     angle = steer_angle + steering_correction[iCamera]
+                    
+                    # Apply prepocessing to image
+                    image = preprocess(image)
+                    
+                    # Add preprocessed image and steer angle to data set
+                    images.append(image)
                     angles.append(angle)
                     
-                    # Augment data with flipped images
+                    # Augment data set with horizontally flipped image and negated steer angle
                     images.append(flip_horizontal(image))
                     angles.append(-angle)
-                    
-                    # TODO: Augment data set using other techniques - brightness, translation?
                     
             # Return shuffled training set
             X = np.array(images)
@@ -72,6 +83,9 @@ def generator(samples, batch_size=32):
             yield shuffle(X, y)
 
 def lenet_model():
+    '''
+    return LeNet-based model architecture
+    '''
     model = Sequential()
     model.add(Lambda(lambda x: x/127.5 - 1, input_shape=image_shape))
     model.add(Cropping2D(cropping=((70,25),(0,0))))
@@ -86,6 +100,9 @@ def lenet_model():
     return model
 
 def nvidia_model():
+    '''
+    return Nvidea-based model architecture
+    '''
     model = Sequential()
     model.add(Lambda(lambda x: x/127.5 - 1, input_shape=image_shape))
     model.add(Cropping2D(cropping=((70,25),(0,0))))
@@ -142,10 +159,7 @@ if __name__ == '__main__':
     # Save model
     model.save('model.h5')
 
-    ### print the keys contained in the history object
-    print(history_object.history.keys())
-
-    ### plot the training and validation loss for each epoch
+    # Plot the training and validation loss for each epoch
     plt.plot(history_object.history['loss'])
     plt.plot(history_object.history['val_loss'])
     plt.title('model mean squared error loss')
