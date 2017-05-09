@@ -47,23 +47,51 @@ The model.py file contains the code for training and saving the convolution neur
 
 ####1. An appropriate model architecture has been employed
 
-My model consists of a convolution neural network with 3x3 filter sizes and depths between 32 and 128 (model.py lines 18-24) 
+My final model is based on the Nvidea architecture consists of the layers:
 
-The model includes RELU layers to introduce nonlinearity (code line 20), and the data is normalized in the model using a Keras lambda layer (code line 18). 
+| Layer | Description | 
+|:---:|:---:| 
+| Input | 160x320x1 grayscale image |
+| Cropping | Crops off the top 70 pixels and bottom 25 pixels of the image, output = 65x320x1 | 
+| Convolution 5x5 | 2x2 stride, output = 31x158x24 output |
+| RELU | activation function |
+| Convolution 5x5 | 2x2 stride, output = 14x77x36 output |
+| RELU | activation function |
+| Convolution 5x5 | 2x2 stride, output = 5x37x48 |
+| RELU | activation function |
+| Convolution 5x5 | output = 3x35x64 |
+| RELU | activation function |
+| Convolution 5x5 | output = 1x33x64 |
+| RELU | activation function |
+| Flatten | flatten outputs to 1-dimensional set of inputs, output = 2112 |
+| Dropout | keep probability of 0.8 |
+| Fully connected	| output = 100 |
+| Dropout | keep probability of 0.8 |
+| Fully connected	| output = 50 |
+| Dropout | keep probability of 0.8 |
+| Fully connected	| output = 10 |
+| Dropout | keep probability of 0.8 |
+| Fully connected	| output = 1 |
+
+defined in ```def nvidea_model()``` in model.py 
+
+The model includes a cropping layer to exclude background scenery and the car bonnet from the input data so that the model focuses on the road features. RELU layers are used to introduce non-linearity to the model and the data is normalized using a Keras lambda layer.
 
 ####2. Attempts to reduce overfitting in the model
 
-The model contains dropout layers in order to reduce overfitting (model.py lines 21). 
+The model contains dropout layers in order to reduce overfitting. 
 
-The model was trained and validated on different data sets to ensure that the model was not overfitting (code line 10-16). The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
+The model was trained and validated on different data sets to ensure that the model was not overfitting. This includes data from both tracks driving in both clockwise and anti-clockwise directions.
+
+The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
 
 ####3. Model parameter tuning
 
-The model used an adam optimizer, so the learning rate was not tuned manually (model.py line 25).
+The model used an adam optimizer, so the learning rate was not tuned manually.
 
 ####4. Appropriate training data
 
-Training data was chosen to keep the vehicle driving on the road. I used a combination of center lane driving, recovering from the left and right sides of the road ... 
+Training data was chosen to keep the vehicle driving on the road. I aimed to keep the vehicle in the centre of the road during each training run and then used images from the centre, right and left cameras with appropriate steer angle corrections to train the model to drive back into the centre of the road when off course.
 
 For details about how I created the training data, see the next section. 
 
@@ -71,52 +99,55 @@ For details about how I created the training data, see the next section.
 
 ####1. Solution Design Approach
 
-The overall strategy for deriving a model architecture was to ...
+The overall strategy for deriving a model architecture was to start from an existing architecture and then make incremental improvements.
 
-My first step was to use a convolution neural network model similar to the ... I thought this model might be appropriate because ...
+My first step was to use the LeNet architecture (similar to that used for the traffic sign classification project). I thought this model might be appropriate because it is used to identify features in images.
 
-In order to gauge how well the model was working, I split my image and steering angle data into a training and validation set. I found that my first model had a low mean squared error on the training set but a high mean squared error on the validation set. This implied that the model was overfitting. 
+In order to gauge how well the model was working, I split my image and steering angle data into a training and validation set. While the model didn't appear to be overfitting it performed poorly on the simulator when it attempted to drive the vehicle autonomously.
 
-To combat the overfitting, I modified the model so that ...
+I then moved over to the Nvidea architecture. This performed better in the simulator but I noticed that the model had a low mean squared error on the training set but a higher mean squared error on the validation set. This implied that the model was overfitting. 
 
-Then I ... 
+This manifested during simulation in the model driving near the centre of the second track (over the dashed lines) but on the first track it was steering to one side of the track and driving over the lane markings. 
 
-The final step was to run the simulator to see how well the car was driving around track one. There were a few spots where the vehicle fell off the track... to improve the driving behavior in these cases, I ....
+To combat the overfitting, I modified the model so that it included a number of dropout layers.
 
-At the end of the process, the vehicle is able to drive autonomously around the track without leaving the road.
+Then I retrained the network and adjusted the number of epochs to run so that the model wasn't overfitting.
+
+At this point the vehicle was able to drive autonomously around the track without leaving the road.
 
 ####2. Final Model Architecture
 
-The final model architecture (model.py lines 18-24) consisted of a convolution neural network with the following layers and layer sizes ...
-
-Here is a visualization of the architecture (note: visualizing the architecture is optional according to the project rubric)
-
-![alt text][image1]
+The final model architecture is based on the NVidea architecture (see earlier for a full description of each layer).
 
 ####3. Creation of the Training Set & Training Process
 
-To capture good driving behavior, I first recorded two laps on track one using center lane driving. Here is an example image of center lane driving:
+To capture good driving behaviour, I first recorded a lap of track one using centre lane driving. Here is an example image of centre lane driving:
 
 ![alt text][image2]
 
-I then recorded the vehicle recovering from the left side and right sides of the road back to center so that the vehicle would learn to .... These images show what a recovery looks like starting from ... :
+I then recorded another lap of track one driving in the opposite direction.
+
+Then I repeated this process on track two in order to get more data points.
+
+I made use of the centre camera image with the original steer angle to teach the model centre lane driving. I then augmented the data set with the left and right camera images. For these images I used a steering correction of +/-0.3 to teach the model how to recover when it deviates from the centre of the road. For example, here are the centre, left and right images with steer angle corrections:
 
 ![alt text][image3]
 ![alt text][image4]
 ![alt text][image5]
 
-Then I repeated this process on track two in order to get more data points.
-
-To augment the data sat, I also flipped images and angles thinking that this would ... For example, here is an image that has then been flipped:
+In addition to driving in the opposite direction, I also flipped images and angles and added these to the training data set. I thought that this would prevent the model from favouring steering in one direction over another and would help teach the model about the symmetry of the problem being solved. For example, here is an image that has then been flipped:
 
 ![alt text][image6]
 ![alt text][image7]
 
-Etc ....
+###TODO: Train it on some tough corners
 
-After the collection process, I had X number of data points. I then preprocessed this data by ...
+After the collection process, I had X number of data points. I then preprocessed this data by turning the images into grayscale. I found this helped especially when I was using a mixture of training data from the two tracks (one being brown cobbles and two being black tarmac).
 
+I finally randomly shuffled the data set and put 20% of the data into a validation set. 
 
-I finally randomly shuffled the data set and put Y% of the data into a validation set. 
+I used this training data for training the model. The validation set helped determine if the model was over or under fitting. The ideal number of epochs was 10. When more epochs were used the validation loss stopped decreasing while the training loss kept decreasing (suggesting overfitting) as seen here:
 
-I used this training data for training the model. The validation set helped determine if the model was over or under fitting. The ideal number of epochs was Z as evidenced by ... I used an adam optimizer so that manually training the learning rate wasn't necessary.
+![alt text][image7]
+
+I used an adam optimizer so that manually training the learning rate wasn't necessary.

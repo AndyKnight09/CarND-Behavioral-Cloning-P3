@@ -17,8 +17,7 @@ log_directory = 'data/'
 
 # Hyperparameters used to tune the model
 EPOCHS = 8                          # Number of training epochs
-LEARNING_RATE = 0.0015              # Learning rate 
-BATCH_SIZE = 32                     # Batch size (before taking into account left/centre/right cameras plus horizontally mirrored images)
+BATCH_SIZE = 64                     # Batch size (before taking into account left/centre/right cameras plus horizontally mirrored images)
 
 SIDE_CAMERA_STEERING_OFFSET = 0.3;  # Steering correction to apply to left/right camera images
 DROPOUT_RATE = 0.2                  # Fraction of input units to dropout for each dropout layer
@@ -150,9 +149,13 @@ if __name__ == '__main__':
     model = nvidia_model()
 
     # Model loss and optimization functions
-    opt = Adam(lr=LEARNING_RATE)
-    model.compile(loss='mse', optimizer=opt, metrics=['accuracy'])
-
+    model.compile(loss='mse', optimizer='adam', metrics=['accuracy'])
+    
+    # Print dimensions of output at each layer
+    for layer in model.layers:
+        print(type(layer))
+        print(layer.output_shape)
+    
     # Train model
     history_object = model.fit_generator(train_generator, steps_per_epoch=len(train_samples)/BATCH_SIZE, validation_data=validation_generator, validation_steps=len(validation_samples)/BATCH_SIZE, epochs=EPOCHS, verbose=1)
 
