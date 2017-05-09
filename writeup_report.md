@@ -140,13 +140,13 @@ In addition to driving in the opposite direction, I also flipped images and angl
 ![alt text][image6]
 ![alt text][image7]
 
-###TODO: Train it on some tough corners
+Having done this I found that the model was capable of driving around track one but failed to get around track two - particularly on the sharper corners. I added some new training data from these difficult corners to help train the model to deal with them.
 
 After the collection process, I had X number of data points. I then preprocessed this data by turning the images into grayscale. I found this helped especially when I was using a mixture of training data from the two tracks (one being brown cobbles and two being black tarmac).
 
 I finally randomly shuffled the data set and put 20% of the data into a validation set. 
 
-I used this training data for training the model. The validation set helped determine if the model was over or under fitting. The ideal number of epochs was 10. When more epochs were used the validation loss stopped decreasing while the training loss kept decreasing (suggesting overfitting) as seen here:
+I used this training data for training the model. The validation set helped determine if the model was over or under fitting. The ideal number of epochs was 8. When more epochs were used the validation loss stopped decreasing while the training loss kept decreasing (suggesting overfitting) as seen here:
 
 ![alt text][image7]
 
