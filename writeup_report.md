@@ -20,13 +20,13 @@ The goals / steps of this project are the following:
 [image8]: ./plots/loss.png "Loss"
 
 ## Rubric Points
-###Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/432/view) individually and describe how I addressed each point in my implementation.  
+### Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/432/view) individually and describe how I addressed each point in my implementation.  
 
 ---
 
-###Files Submitted & Code Quality
+### Files Submitted & Code Quality
 
-####1. Submission includes all required files and can be used to run the simulator in autonomous mode
+#### 1. Submission includes all required files and can be used to run the simulator in autonomous mode
 
 My project includes the following files:
 
@@ -37,17 +37,17 @@ My project includes the following files:
 * [run1.mp4](run1.mp4) showing the model being used to autonomously drive around track 1
 * [run2.mp4](run2.mp4) showing the model being used to autonomously drive around track 2
 
-####2. Submission includes functional code
+#### 2. Submission includes functional code
 
 Using the Udacity provided simulator and my drive.py file, the car can be driven autonomously around the track by executing ```python drive.py model.h5```
 
-####3. Submission code is usable and readable
+#### 3. Submission code is usable and readable
 
 The model.py file contains the code for training and saving the convolution neural network. The file shows the pipeline I used for training and validating the model, and it contains comments to explain how the code works.
 
-###Model Architecture and Training Strategy
+### Model Architecture and Training Strategy
 
-####1. An appropriate model architecture has been employed
+#### 1. An appropriate model architecture has been employed
 
 My final model is based on the Nvidea architecture consists of the following layers:
 
@@ -79,7 +79,7 @@ defined in ```def nvidea_model()``` in model.py
 
 The model includes a cropping layer to exclude background scenery and the car bonnet from the input data so that the model focuses on the road features. RELU layers are used to introduce non-linearity to the model and the data is normalized using a Keras lambda layer.
 
-####2. Attempts to reduce overfitting in the model
+#### 2. Attempts to reduce overfitting in the model
 
 The model contains dropout layers in order to reduce overfitting. 
 
@@ -87,19 +87,19 @@ The model was trained and validated on different data sets to ensure that the mo
 
 The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
 
-####3. Model parameter tuning
+#### 3. Model parameter tuning
 
 The model used an adam optimizer, so the learning rate was not tuned manually.
 
-####4. Appropriate training data
+#### 4. Appropriate training data
 
 Training data was chosen to keep the vehicle driving on the road. I aimed to keep the vehicle in the centre of the road during each training run and then used images from the centre, right and left cameras with appropriate steer angle corrections to train the model to drive back into the centre of the road when off course.
 
 For details about how I created the training data, see the next section. 
 
-###Model Architecture and Training Strategy
+### Model Architecture and Training Strategy
 
-####1. Solution Design Approach
+#### 1. Solution Design Approach
 
 The overall strategy for deriving a model architecture was to start from an existing architecture and then make incremental improvements.
 
@@ -117,11 +117,11 @@ Then I retrained the network and adjusted the number of epochs to run so that th
 
 At this point the vehicle was able to drive autonomously around the track without leaving the road.
 
-####2. Final Model Architecture
+#### 2. Final Model Architecture
 
 The final model architecture is based on the NVidea architecture (see earlier for a full description of each layer).
 
-####3. Creation of the Training Set & Training Process
+#### 3. Creation of the Training Set & Training Process
 
 To capture good driving behaviour, I first recorded a lap of track one using centre lane driving. Here is an example image of centre lane driving:
 
@@ -133,14 +133,15 @@ Then I repeated this process on track two in order to get more data points.
 
 I made use of the centre camera image with the original steer angle to teach the model centre lane driving. I then augmented the data set with the left and right camera images. For these images I used a steering correction of +/-0.3 to teach the model how to recover when it deviates from the centre of the road. For example, here are the left, centre and right images with steer angle corrections:
 
-| Left (Steer Correction = -0.3) | Centre (Steer Correction = 0.0) | Right (Steer Correction = 0.3) |
+| Left (Steer Correction = +0.3) | Centre (Steer Correction = 0.0) | Right (Steer Correction = -0.3) |
 | --- | --- | --- |
 | ![alt text][image2] | ![alt text][image3] | ![alt text][image4] |
 
 In addition to driving in the opposite direction, I also flipped images and angles and added these to the training data set. I thought that this would prevent the model from favouring steering in one direction over another and would help teach the model about the symmetry of the problem being solved. For example, here is an image that has then been flipped:
 
-![alt text][image5]
-![alt text][image6]
+| Original (Steer = -0.045) | Flipped (Steer = +0.045) |
+| --- | --- |
+| ![alt text][image5] | ![alt text][image6] |
 
 Having done this I found that the model was capable of driving around track one but failed to get around track two - particularly on the sharper corners. I added some new training data from these difficult corners to help train the model to deal with them.
 
@@ -156,3 +157,5 @@ I used this training data for training the model. The validation set helped dete
 ![alt text][image8]
 
 I used an adam optimizer so that manually training the learning rate wasn't necessary.
+
+Having done all of this I had a model that was capable of driving around both tracks safely.
