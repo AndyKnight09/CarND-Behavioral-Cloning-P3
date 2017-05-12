@@ -11,6 +11,7 @@ from keras.layers import Flatten, Dense, Lambda, Cropping2D, Dropout
 from keras.layers.convolutional import Convolution2D
 from keras.layers.pooling import MaxPooling2D
 from keras.optimizers import Adam
+from keras.utils import plot_model
 
 # Directory containing recorded simulation data
 log_directory = 'data/'
@@ -151,10 +152,10 @@ if __name__ == '__main__':
     # Model loss and optimization functions
     model.compile(loss='mse', optimizer='adam', metrics=['accuracy'])
     
-    # Print dimensions of output at each layer
-    for layer in model.layers:
-        print(type(layer))
-        print(layer.output_shape)
+    # Print model summary
+    print(model.summary())
+    
+    error(0)
     
     # Train model
     history_object = model.fit_generator(train_generator, steps_per_epoch=len(train_samples)/BATCH_SIZE, validation_data=validation_generator, validation_steps=len(validation_samples)/BATCH_SIZE, epochs=EPOCHS, verbose=1)

@@ -8,16 +8,16 @@ The goals / steps of this project are the following:
 * Test that the model successfully drives around track one without leaving the road
 * Summarize the results with a written report
 
-
 [//]: # (Image References)
 
-[image1]: ./examples/placeholder.png "Model Visualization"
-[image2]: ./examples/placeholder.png "Grayscaling"
-[image3]: ./examples/placeholder_small.png "Recovery Image"
-[image4]: ./examples/placeholder_small.png "Recovery Image"
-[image5]: ./examples/placeholder_small.png "Recovery Image"
-[image6]: ./examples/placeholder_small.png "Normal Image"
-[image7]: ./examples/placeholder_small.png "Flipped Image"
+[image1]: ./plots/centre_lane_driving.jpg "Centre Lane Driving"
+[image2]: ./plots/left_camera.jpg "Left Camera"
+[image3]: ./plots/centre_camera.jpg "Centre Camera"
+[image4]: ./plots/right_camera.jpg "Right Camera"
+[image5]: ./plots/original.jpg "Original Image"
+[image6]: ./plots/flipped.jpg "Flipped Image"
+[image7]: ./plots/grayscale.jpg "Grayscale Image"
+[image8]: ./plots/loss.png "Loss"
 
 ## Rubric Points
 ###Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/432/view) individually and describe how I addressed each point in my implementation.  
@@ -30,10 +30,12 @@ The goals / steps of this project are the following:
 
 My project includes the following files:
 
-* model.py containing the script to create and train the model
-* drive.py for driving the car in autonomous mode
-* model.h5 containing a trained convolution neural network 
-* writeup_report.md (this file) summarizing the results
+* [model.py](model.py) containing the script to create and train the model
+* [drive.py](drive.py) for driving the car in autonomous mode
+* [model.h5](model.h5) containing a trained convolution neural network 
+* [writeup_report.md](writeup_report.md) (this file) summarizing the results
+* [run1.mp4](run1.mp4) showing the model being used to autonomously drive around track 1
+* [run2.mp4](run2.mp4) showing the model being used to autonomously drive around track 2
 
 ####2. Submission includes functional code
 
@@ -47,7 +49,7 @@ The model.py file contains the code for training and saving the convolution neur
 
 ####1. An appropriate model architecture has been employed
 
-My final model is based on the Nvidea architecture consists of the layers:
+My final model is based on the Nvidea architecture consists of the following layers:
 
 | Layer | Description | 
 |:---:|:---:| 
@@ -123,31 +125,34 @@ The final model architecture is based on the NVidea architecture (see earlier fo
 
 To capture good driving behaviour, I first recorded a lap of track one using centre lane driving. Here is an example image of centre lane driving:
 
-![alt text][image2]
+![alt text][image1]
 
 I then recorded another lap of track one driving in the opposite direction.
 
 Then I repeated this process on track two in order to get more data points.
 
-I made use of the centre camera image with the original steer angle to teach the model centre lane driving. I then augmented the data set with the left and right camera images. For these images I used a steering correction of +/-0.3 to teach the model how to recover when it deviates from the centre of the road. For example, here are the centre, left and right images with steer angle corrections:
+I made use of the centre camera image with the original steer angle to teach the model centre lane driving. I then augmented the data set with the left and right camera images. For these images I used a steering correction of +/-0.3 to teach the model how to recover when it deviates from the centre of the road. For example, here are the left, centre and right images with steer angle corrections:
 
-![alt text][image3]
-![alt text][image4]
-![alt text][image5]
+| Left (Steer Correction = -0.3) | Centre (Steer Correction = 0.0) | Right (Steer Correction = 0.3) |
+| --- | --- | --- |
+| ![alt text][image2] | ![alt text][image3] | ![alt text][image4] |
 
 In addition to driving in the opposite direction, I also flipped images and angles and added these to the training data set. I thought that this would prevent the model from favouring steering in one direction over another and would help teach the model about the symmetry of the problem being solved. For example, here is an image that has then been flipped:
 
+![alt text][image5]
 ![alt text][image6]
-![alt text][image7]
 
 Having done this I found that the model was capable of driving around track one but failed to get around track two - particularly on the sharper corners. I added some new training data from these difficult corners to help train the model to deal with them.
 
-After the collection process, I had X number of data points. I then preprocessed this data by turning the images into grayscale. I found this helped especially when I was using a mixture of training data from the two tracks (one being brown cobbles and two being black tarmac).
+After the collection process, I had 5216 data points (which each had 3 camera images and the flipped versions of each of these so 31296 in total). I then preprocessed this data by turning the images into grayscale. I found this helped especially when I was using a mixture of training data from the two tracks (track one being brown speckled surface and track two being black tarmac).
+
+![alt text][image5]
+![alt text][image7]
 
 I finally randomly shuffled the data set and put 20% of the data into a validation set. 
 
-I used this training data for training the model. The validation set helped determine if the model was over or under fitting. The ideal number of epochs was 8. When more epochs were used the validation loss stopped decreasing while the training loss kept decreasing (suggesting overfitting) as seen here:
+I used this training data for training the model. The validation set helped determine if the model was over or under fitting. I settled on 8 epochs to train my model. When more epochs were used the validation loss stopped decreasing while the training loss kept decreasing (suggesting overfitting) as seen here:
 
-![alt text][image7]
+![alt text][image8]
 
 I used an adam optimizer so that manually training the learning rate wasn't necessary.

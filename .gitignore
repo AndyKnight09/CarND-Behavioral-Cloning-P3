@@ -1,7 +1,6 @@
 data
 example_data
 windows-sim
-*.h5
 *.zip
 Behavioral Cloning Cheatsheet - CarND (1).pdf
 run1
